@@ -5,7 +5,7 @@
 
 Name:		leapp-data-%{dist_name}
 Version:	0.3
-Release:	6%{?dist}.%{pes_events_build_date}
+Release:	7%{?dist}.%{pes_events_build_date}
 Summary:	data for migrating tool
 Group:		Applications/Databases
 License:	ASL 2.0
@@ -52,6 +52,9 @@ make install PREFIX=%{buildroot}
 
 
 %changelog
+
+* Fri Jul 11 2025 Oleksandr Shyshatskyi <oshyshatskyi@cloudlinux.com> - 0.3-7.cloudlinux
+- CLOS-3457: Add alt_common repository support
 
 * Tue Jun 10 2025 Oleksandr Shyshatskyi <oshyshatskyi@cloudlinux.com> - 0.3-6.cloudlinux
 - CLOS-2988: Fix imunify360-firewall package upgrade
