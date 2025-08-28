@@ -56,6 +56,7 @@ make install PREFIX=%{buildroot}
 * Sun Aug 17 2025 Oleksandr Shyshatskyi <oshyshatskyi@cloudlinux.com> - 0.3-8.cloudlinux
 - CLOS-3468: Keep python3-pyOpenSSL during updates
 - CLOS-3535: Keep libidn during upgrade
+- CLOS-3556: Update imunify repository gpg key
 
 * Fri Jul 11 2025 Oleksandr Shyshatskyi <oshyshatskyi@cloudlinux.com> - 0.3-7.cloudlinux
 - CLOS-3457: Add alt_common repository support
