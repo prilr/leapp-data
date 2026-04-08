@@ -93,3 +93,52 @@ rpm:
 		--transform 's,^,$(shell rpm -q -D "dist_name cloudlinux" --queryformat="%{NAME}-%{VERSION}\n" --specfile leapp-data.spec)/,'
 
 	rpmbuild -bb -D "dist_name cloudlinux" leapp-data.spec
+
+# =============================================================================
+# Workspace targets (sync-sources, build-package, install-package, tests)
+# =============================================================================
+
+SPEC_FILE := leapp-data.spec
+VERSION := $(shell grep -m1 '^Version:' $(SPEC_FILE) | awk '{print $$2}')
+RPMBUILD_DIR := $(CURDIR)/.rpmbuild
+
+# sync-sources: Build and install data files to system paths for development
+sync-sources: all
+	@echo "Syncing leapp-data to system paths..."
+	rsync -a --ignore-errors $(buildroot)/ /
+	@echo "Done. Files synced to /etc/leapp/"
+
+# build-package: Build RPM using rpmbuild with local _topdir
+build-package:
+	@echo "Building RPM package..."
+	@mkdir -p $(RPMBUILD_DIR)/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+	@echo "-> Creating source tarball"
+	git ls-files -z | xargs -0 tar \
+		-czf $(RPMBUILD_DIR)/SOURCES/leapp-data-$(VERSION).tar.gz \
+		--transform 's,^,leapp-data-$(VERSION)/,'
+	@cp $(SPEC_FILE) $(RPMBUILD_DIR)/SPECS/
+	rpmbuild -bb \
+		--define "_topdir $(RPMBUILD_DIR)" \
+		--define "dist $$(rpm --eval '%{dist}').$$(date +%s)" \
+		--define "dist_name $(DIST_NAME)" \
+		$(RPMBUILD_DIR)/SPECS/$(SPEC_FILE)
+	@echo "Build complete! RPMs at: $(RPMBUILD_DIR)/RPMS/"
+
+# install-package: Install built RPM package
+install-package:
+	@RPM_FILE=$$(ls -t $(RPMBUILD_DIR)/RPMS/noarch/leapp-data-*.rpm 2>/dev/null | head -1); \
+	if [ -z "$$RPM_FILE" ]; then \
+		echo "Error: No RPM found. Run 'make build-package' first."; \
+		exit 1; \
+	fi; \
+	echo "Installing $$RPM_FILE"; \
+	yum install -y $$RPM_FILE
+
+# run-unit-tests: Run JSON validation tests
+run-unit-tests: all
+	@echo "Running unit tests..."
+	$(MAKE) test
+
+# run-integration-tests: No integration tests for data-only package
+run-integration-tests:
+	@echo "No integration tests configured for leapp-data (data-only package)."
